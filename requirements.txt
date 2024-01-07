@@ -1,0 +1,17 @@
+pdfplumber==0.8.0
+elasticsearch==8.6.2
+PyPDF2==2.11.2
+tqdm==4.64.1
+openai==0.27.2
+pytest~=7.1.2
+numpy~=1.22.3
+fastapi~=0.88.0
+pandas~=1.4.4
+uvicorn==0.21.1
+python-dotenv==1.0.0
+bs4==0.0.1
+black==22.3.0
+pydantic==1.9.1
+emoji==0.6.0
+pytz==2021.3
+mangum==0.14.0
