@@ -1,6 +1,6 @@
 
 ```bash
-python -m uvicorn api.main:app --port 8080 --reload
+python -m uvicorn qa_engine.api.main:app --port 4204 --reload --env-file .env
 ```
 Add .env
 ```
