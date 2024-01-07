@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 import elasticsearch.helpers
 
-from core.models import EmbeddingEntry
+from qa_engine.core.models import EmbeddingEntry
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 

@@ -1,5 +1,5 @@
-from core.document_factory import ESDocumentFactory
-from core.models import TextEntry
+from qa_engine.core.document_factory import ESDocumentFactory
+from qa_engine.core.models import TextEntry
 import pytest
 import time
 

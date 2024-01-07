@@ -1,5 +1,5 @@
-from core.embedding_operator import ModelEmbeddingOperator
-from core.models import TextEntry
+from qa_engine.core.embedding_operator import ModelEmbeddingOperator
+from qa_engine.core.models import TextEntry
 import numpy as np
 import pytest
 

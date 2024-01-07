@@ -2,7 +2,7 @@ import string
 import random
 from datetime import datetime, timedelta, timezone
 import pytz
-from api.config import get_settings
+from qa_engine.api.config import get_settings
 
 settings = get_settings()
 print(settings)

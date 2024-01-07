@@ -4,9 +4,9 @@
 ######################################################
 
 from abc import ABC
-from core.caching_strategy import CachingStrategy
-from core.answer_strategy import AnswerStrategy
-from core.models import Document
+from qa_engine.core.caching_strategy import CachingStrategy
+from qa_engine.core.answer_strategy import AnswerStrategy
+from qa_engine.core.models import Document
 
 
 class IRSystem(ABC):

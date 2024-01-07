@@ -3,7 +3,7 @@ import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"  # Something for tokenizers library, must be here
 
 from abc import ABC, abstractmethod
-from core.models import TextEntry
+from qa_engine.core.models import TextEntry
 # from transformers import pipeline
 import openai
 

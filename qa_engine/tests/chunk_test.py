@@ -1,5 +1,5 @@
-from utils.path import get_absolute_path
-from utils.chunk import chunk_corpus, show_chunk
+from qa_engine.utils.path import get_absolute_path
+from qa_engine.utils.chunk import chunk_corpus, show_chunk
 
 
 def test_basic_chunking():

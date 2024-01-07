@@ -1,16 +1,16 @@
 from typing import List, Dict, Any
 from fastapi import APIRouter, Depends
-from api.config import get_settings, Settings
-from core.document_factory import ESDocumentFactory
-from core.embedding_factory import ESEmbeddingFactory
-from core.caching_strategy import JSONCachingStrategy
-from core.embedding_operator import OpenAIEmbeddingOperator
-from core.document_operator import BasicDocumentOperator
-from core.answer_strategy import OpenAIAnswerStrategy
-from core.ir_system import IRSystem
-from core.models import Document
+from qa_engine.api.config import get_settings, Settings
+from qa_engine.core.document_factory import ESDocumentFactory
+from qa_engine.core.embedding_factory import ESEmbeddingFactory
+from qa_engine.core.caching_strategy import JSONCachingStrategy
+from qa_engine.core.embedding_operator import OpenAIEmbeddingOperator
+from qa_engine.core.document_operator import BasicDocumentOperator
+from qa_engine.core.answer_strategy import OpenAIAnswerStrategy
+from qa_engine.core.ir_system import IRSystem
+from qa_engine.core.models import Document
 from pydantic import BaseModel
-from api.utils import create_response
+from qa_engine.api.utils import create_response
 
 settings = get_settings()
 

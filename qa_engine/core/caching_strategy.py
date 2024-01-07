@@ -1,13 +1,13 @@
 from abc import ABC, abstractmethod
-from core.models import TextEntry, EmbeddingEntry, Document
-from core.embedding_operator import EmbeddingOperator
-from core.embedding_factory import EmbeddingFactory
-from core.document_factory import DocumentFactory, generate_id
+from qa_engine.core.models import TextEntry, EmbeddingEntry, Document
+from qa_engine.core.embedding_operator import EmbeddingOperator
+from qa_engine.core.embedding_factory import EmbeddingFactory
+from qa_engine.core.document_factory import DocumentFactory, generate_id
 # from algorithm.document_operator import DocumentOperator
-from core.document_operator import DocumentOperator
+from qa_engine.core.document_operator import DocumentOperator
 from typing import List
 import pandas as pd
-from utils.chunk import chunk_corpus
+from qa_engine.utils.chunk import chunk_corpus
 
 """
 CachingStrategy is an abstract class that defines the interface for caching strategies.

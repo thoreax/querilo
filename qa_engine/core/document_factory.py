@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from core.models import TextEntry
+from qa_engine.core.models import TextEntry
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 import uuid

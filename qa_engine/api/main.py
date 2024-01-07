@@ -1,8 +1,8 @@
-from api import config
+from qa_engine.api import config
 from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
-from api.routers import es
+from qa_engine.api.routers import es
 from mangum import Mangum
 
 settings = config.get_settings()

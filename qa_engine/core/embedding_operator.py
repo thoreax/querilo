@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from core.models import TextEntry, EmbeddingEntry
+from qa_engine.core.models import TextEntry, EmbeddingEntry
 # from sentence_transformers import SentenceTransformer
 from openai import Embedding as OpenAIEmbedding
 import openai

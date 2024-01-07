@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from tqdm import tqdm
 from PyPDF2 import PdfReader
-from core.models import Document
+from qa_engine.core.models import Document
 
 
 class DocumentOperator(ABC):

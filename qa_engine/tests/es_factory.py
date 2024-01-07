@@ -1,5 +1,5 @@
-from core.embedding_factory import ESEmbeddingFactory
-from core.models import EmbeddingEntry
+from qa_engine.core.embedding_factory import ESEmbeddingFactory
+from qa_engine.core.models import EmbeddingEntry
 import pytest
 import time
 
