@@ -52,6 +52,10 @@ class CachingStrategy(ABC):
         entries = self.embedding_factory.retrieve(doc_id, query_embedding, metadata)
         return self._embedding2text_entries(doc_id, entries)
 
+    def remove_by_ids(self, doc_id: str, entry_ids: List[str], *args, **kwargs) -> bool:
+        self.embedding_factory.remove_by_ids(doc_id, entry_ids, *args, **kwargs)
+        return self.document_factory.remove_by_ids(doc_id, entry_ids, *args, **kwargs)
+
     @abstractmethod
     def _parsed_obj_to_entries(self, parsed_obj) -> List[TextEntry]:
         pass
