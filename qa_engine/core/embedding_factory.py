@@ -19,6 +19,10 @@ class EmbeddingFactory(ABC):
         pass
 
     @abstractmethod
+    def remove_by_ids(self, doc_id: str, embedding_ids: List[str], *args, **kwargs):
+        pass
+
+    @abstractmethod
     def retrieve(self, doc_id: str, embedding: List[float], metadata: dict, *args, **kwargs) -> List[EmbeddingEntry]:
         pass
 
@@ -135,4 +139,18 @@ class ESEmbeddingFactory(EmbeddingFactory):
                 # print reason
                 print(item['index']['error'])
 
-                
+    def remove_by_ids(self, doc_id: str, embedding_ids: List[str], refresh=False, *args, **kwargs):
+        actions = [
+            {
+                "_op_type": "delete",
+                "_index": self.index_name,
+                "_id": embedding_id,
+            }
+            for embedding_id in embedding_ids]
+        try:
+            bulk(self.es_client, actions, refresh=refresh)
+        except elasticsearch.helpers.BulkIndexError as e:
+            # Print reaosons
+            for item in e.errors:
+                # print reason
+                print(item['index']['error'])

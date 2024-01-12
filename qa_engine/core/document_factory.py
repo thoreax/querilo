@@ -21,6 +21,10 @@ class DocumentFactory(ABC):
         pass
 
     @abstractmethod
+    def remove_by_ids(self, doc_id, entry_ids: List[str], *args, **kwargs) -> bool:
+        pass
+
+    @abstractmethod
     def retrieve(self, doc_id, document_ids: List[str], metadata: dict = None, *args, **kwargs) -> [
         TextEntry]:
         pass
@@ -64,18 +68,6 @@ class ESDocumentFactory(DocumentFactory):
                     "text": entry.text,
                     "metadata": entry.metadata,
                 }
-            }
-            for entry in entries
-        ]
-        bulk(self.es_client, actions, refresh=refresh)
-        return True
-
-    def remove(self, doc_id, entries: List[TextEntry], refresh=False, *args, **kwargs) -> bool:
-        actions = [
-            {
-                "_op_type": "delete",
-                "_index": self.index_name,
-                "_id": f"{doc_id}_{entry.id}",
             }
             for entry in entries
         ]
