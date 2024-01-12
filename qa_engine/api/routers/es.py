@@ -26,9 +26,10 @@ class IndexDocumentsRequest(BaseModel):
     association_id: str
     embedding_provider = "openai"
     text_keys: List[str]
+    id_key: str
 
 
-def configure_ir_system(index_name: str, config: Settings, text_keys=["description"]):
+def configure_ir_system(index_name: str, config: Settings, text_keys=["description"], id_key="id"):
     es_client_params = {
         "cloud_id": config.es_cloud_id,
         "http_auth": (config.es_username, config.es_password),
@@ -39,6 +40,7 @@ def configure_ir_system(index_name: str, config: Settings, text_keys=["descripti
         embedding_operator=OpenAIEmbeddingOperator("text-embedding-ada-002", config.openai_key, config.openai_org),
         document_operator=BasicDocumentOperator(),
         text_keys=text_keys,
+        id_key=id_key,
     )
     answer_strategy = OpenAIAnswerStrategy("gpt-3.5-turbo-16k", config.openai_key, config.openai_org)
     ir_system = IRSystem(caching_strategy=json_strategy, answer_strategy=answer_strategy)

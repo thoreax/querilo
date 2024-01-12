@@ -3,7 +3,6 @@ from qa_engine.core.models import TextEntry, EmbeddingEntry, Document
 from qa_engine.core.embedding_operator import EmbeddingOperator
 from qa_engine.core.embedding_factory import EmbeddingFactory
 from qa_engine.core.document_factory import DocumentFactory, generate_id
-# from algorithm.document_operator import DocumentOperator
 from qa_engine.core.document_operator import DocumentOperator
 from typing import List
 import pandas as pd
@@ -80,18 +79,20 @@ class JSONCachingStrategy(CachingStrategy):
                  document_factory: DocumentFactory,
                  embedding_operator: EmbeddingOperator,
                  document_operator: DocumentOperator,
-                 text_keys: List[str]):
+                 text_keys: List[str],
+                 id_key: str):
         super().__init__(embedding_factory, document_factory, embedding_operator, document_operator)
         self.text_keys = text_keys
+        self.id_key = id_key
 
     def _parsed_obj_to_entries(self, parsed_obj: List[dict]) -> List[TextEntry]:
         text_entries = []
         for obj in parsed_obj:
-            metadata = {key: obj[key] for key in self.text_keys}
+            obj_id = obj[self.id_key]
             text = ""
             for key in self.text_keys:
                 text += f"{key}: {obj[key]}\n"
-            text_entries.append(TextEntry(id=generate_id(), text=text, metadata=metadata))
+            text_entries.append(TextEntry(id=obj_id, text=text, metadata=obj))
         return text_entries
 
 
