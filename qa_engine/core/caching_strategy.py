@@ -49,7 +49,13 @@ class CachingStrategy(ABC):
             self.embedding_operator.embed([TextEntry(generate_id(), text=query, metadata={})])[
                 0].embedding
         entries = self.embedding_factory.retrieve(doc_id, query_embedding, metadata)
-        return self._embedding2text_entries(doc_id, entries)
+        id2metadata = {}
+        for e in entries:
+            id2metadata[e.id] = e.metadata
+        text_entries = self._embedding2text_entries(doc_id, entries)
+        for text_entry in text_entries:
+            text_entry.metadata["__rank"] = id2metadata[text_entry.id]["__rank"]
+        return text_entries
 
     def remove_by_ids(self, doc_id: str, entry_ids: List[str], *args, **kwargs) -> bool:
         self.embedding_factory.remove_by_ids(doc_id, entry_ids, *args, **kwargs)
@@ -139,7 +145,7 @@ class ChunkingCachingStrategy(CachingStrategy):
         for chunk_id in unique_chunk_ids:
             by_chunk[chunk_id] = {"rank_score": 0, "entries": []}
         for i, text_entry in enumerate(text_entries):
-            by_chunk[text_entry.metadata["chunk_id"]]["rank_score"] += len(text_entry.text)
+            by_chunk[text_entry.metadata["chunk_id"]]["rank_score"] += text_entry.metadata["__rank"]
             by_chunk[text_entry.metadata["chunk_id"]]["entries"].append(text_entry)
         sorted_chunks = sorted(by_chunk.items(), key=lambda x: -x[1]["rank_score"])
         final_entries = []

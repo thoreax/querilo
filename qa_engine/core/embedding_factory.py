@@ -112,14 +112,17 @@ class ESEmbeddingFactory(EmbeddingFactory):
             query["query"]["script_score"]["query"]["match"]["metadata"] = metadata
 
         response = self.es_client.search(index=self.index_name, body=query)
-        return [
-            EmbeddingEntry(
+        result = []
+        for hit in response["hits"]["hits"]:
+            entry = EmbeddingEntry(
                 hit["_id"],
                 hit["_source"]["embedding"],
                 hit["_source"]["metadata"],
             )
-            for hit in response["hits"]["hits"]
-        ]
+            entry.metadata["__rank"] = hit["_score"]
+            result.append(entry)
+        return result
+
 
     def remove_by_ids(self, doc_id: str, embedding_ids: List[str], refresh=False, *args, **kwargs):
         query = {
