@@ -112,7 +112,7 @@ class ChunkingCachingStrategy(CachingStrategy):
                  embedding_operator: EmbeddingOperator,
                  document_operator: DocumentOperator,
                  chunk_size=8,
-                 sentence_word_count=(15, 75)):
+                 sentence_word_count=(15, 50)):
         super().__init__(embedding_factory, document_factory, embedding_operator,
                          document_operator)
         self.chunk_size = chunk_size
@@ -173,9 +173,14 @@ class JSONChunkingCachingStrategy(ChunkingCachingStrategy):
         json_objs: List[dict] = document.data
         ids = [json_obj[self.id_key] for json_obj in json_objs]
         existing_text_entries = self.document_factory.retrieve(document.id, document_ids=None, metadata={"obj_id": ids})
-        id_black_list = [text_entry.id for text_entry in existing_text_entries]
+        id_black_list = []
+        for text_entry in existing_text_entries:
+            if text_entry.metadata["obj_id"] not in id_black_list:
+                id_black_list.append(text_entry.metadata["obj_id"])
         white_objects = list(filter(lambda x: x[self.id_key] not in id_black_list, json_objs))
         new_doc = Document(document.id, data=white_objects)
+        if not white_objects:
+            return
         super().cache(new_doc)
 
     def _parsed_obj_to_entries(self, parsed_obj: List[dict]) -> List[TextEntry]:

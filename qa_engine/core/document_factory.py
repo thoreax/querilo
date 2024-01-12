@@ -75,6 +75,7 @@ class ESDocumentFactory(DocumentFactory):
     def retrieve(self, doc_id, document_ids: List[str] = None, metadata: dict = None, *args,
                  **kwargs) -> [TextEntry]:
         query = {
+            "size": "10000",
             "query": {
                 "bool": {
                     "must": [
