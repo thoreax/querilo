@@ -112,7 +112,7 @@ class ChunkingCachingStrategy(CachingStrategy):
                  embedding_operator: EmbeddingOperator,
                  document_operator: DocumentOperator,
                  chunk_size=8,
-                 sentence_word_count=(15, 50)):
+                 sentence_word_count=(15, 75)):
         super().__init__(embedding_factory, document_factory, embedding_operator,
                          document_operator)
         self.chunk_size = chunk_size
@@ -157,7 +157,7 @@ class JSONChunkingCachingStrategy(ChunkingCachingStrategy):
                  text_keys: List[str],
                  id_key: str,
                  chunk_size=8,
-                 sentence_word_count=(15, 100)):
+                 sentence_word_count=(15, 70)):
         super().__init__(
             embedding_factory,
             document_factory,
