@@ -106,7 +106,7 @@ class ESEmbeddingFactory(EmbeddingFactory):
                     },
                 },
             },
-            "size": 10,
+            "size": 25,
         }
         if metadata is not None:
             query["query"]["script_score"]["query"]["match"]["metadata"] = metadata
