@@ -53,9 +53,7 @@ def index_documents(
         index_name: str,
         config: Settings = Depends(get_settings)):
     ir_system = configure_ir_system(index_name, config, request.text_keys)
-    ir_system.index_document(
-        Document(request.association_id, data=request.documents),
-    )
+    ir_system.index_document(Document(request.association_id, data=request.documents))
     return create_response(f"Indexed {len(request.documents)} documents in {index_name}")
 
 
