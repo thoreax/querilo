@@ -112,14 +112,13 @@ class ChunkingCachingStrategy(CachingStrategy):
                  embedding_operator: EmbeddingOperator,
                  document_operator: DocumentOperator,
                  chunk_size=8,
-                 sentence_word_count=(15, 100)):
+                 sentence_word_count=(15, 75)):
         super().__init__(embedding_factory, document_factory, embedding_operator,
                          document_operator)
         self.chunk_size = chunk_size
         self.sentence_word_count = sentence_word_count
 
     def _chunk_corpus(self, corpus: str) -> List[TextEntry]:
-
         chunks = chunk_corpus(corpus, self.chunk_size, self.sentence_word_count)
 
         text_entry_chunks = []
@@ -190,8 +189,8 @@ class JSONChunkingCachingStrategy(ChunkingCachingStrategy):
                 obj_key_text = obj[key]
                 obj_key_text_entries = self._chunk_corpus(obj_key_text)
                 for text_entry in obj_key_text_entries:
-                    text_entry.metadata["obj_id"] = obj_id
-                    text_entry.metadata["obj_key"] = key
+                    text_entry.metadata["key"] = key
+                    text_entry.metadata["obj"] = obj
                 text_entries += obj_key_text_entries
         return text_entries
 
