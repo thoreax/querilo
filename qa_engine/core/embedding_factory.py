@@ -15,10 +15,6 @@ class EmbeddingFactory(ABC):
         pass
 
     @abstractmethod
-    def remove(self, doc_id: str, embeddings: List[EmbeddingEntry], *args, **kwargs):
-        pass
-
-    @abstractmethod
     def remove_by_ids(self, doc_id: str, embedding_ids: List[str], *args, **kwargs):
         pass
 
@@ -26,6 +22,8 @@ class EmbeddingFactory(ABC):
     def retrieve(self, doc_id: str, embedding: List[float], metadata: dict, *args, **kwargs) -> List[EmbeddingEntry]:
         pass
 
+    def remove(self, doc_id: str, embeddings: List[EmbeddingEntry], *args, **kwargs):
+        return self.remove_by_ids(doc_id, [embedding.id for embedding in embeddings], *args, **kwargs)
 
 class ESEmbeddingFactory(EmbeddingFactory):
 
@@ -123,34 +121,16 @@ class ESEmbeddingFactory(EmbeddingFactory):
             for hit in response["hits"]["hits"]
         ]
 
-    def remove(self, doc_id: str, embeddings: List[EmbeddingEntry], refresh=False, *args, **kwargs):
-        actions = [
-            {
-                "_op_type": "delete",
-                "_index": self.index_name,
-                "_id": embedding_entry.id,
-            }
-            for embedding_entry in embeddings]
-        try:
-            bulk(self.es_client, actions, refresh=refresh)
-        except elasticsearch.helpers.BulkIndexError as e:
-            # Print reaosons
-            for item in e.errors:
-                # print reason
-                print(item['index']['error'])
-
     def remove_by_ids(self, doc_id: str, embedding_ids: List[str], refresh=False, *args, **kwargs):
-        actions = [
-            {
-                "_op_type": "delete",
-                "_index": self.index_name,
-                "_id": embedding_id,
-            }
-            for embedding_id in embedding_ids]
-        try:
-            bulk(self.es_client, actions, refresh=refresh)
-        except elasticsearch.helpers.BulkIndexError as e:
-            # Print reaosons
-            for item in e.errors:
-                # print reason
-                print(item['index']['error'])
+        query = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"parent_doc_id": doc_id}},
+                        {"terms": {"id": embedding_ids}},
+                    ],
+                },
+            },
+        }
+        self.es_client.delete_by_query(index=self.index_name, body=query, refresh=refresh)
+        return True

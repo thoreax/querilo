@@ -17,10 +17,6 @@ class DocumentFactory(ABC):
         pass
 
     @abstractmethod
-    def remove(self, doc_id, entries: List[TextEntry], *args, **kwargs) -> bool:
-        pass
-
-    @abstractmethod
     def remove_by_ids(self, doc_id, entry_ids: List[str], *args, **kwargs) -> bool:
         pass
 
@@ -28,6 +24,9 @@ class DocumentFactory(ABC):
     def retrieve(self, doc_id, document_ids: List[str], metadata: dict = None, *args, **kwargs) -> [
         TextEntry]:
         pass
+
+    def remove(self, doc_id, entries: List[TextEntry], *args, **kwargs) -> bool:
+        return self.remove_by_ids(doc_id, [entry.id for entry in entries], *args, **kwargs)
 
 
 class ESDocumentFactory(DocumentFactory):
@@ -101,3 +100,17 @@ class ESDocumentFactory(DocumentFactory):
             for hit in response["hits"]["hits"]
         ]
         return entries
+
+    def remove_by_ids(self, doc_id, entry_ids: List[str], *args, **kwargs) -> bool:
+        query = {
+            "query": {
+                "bool": {
+                    "must": [
+                        {"term": {"parent_doc_id": doc_id}},
+                        {"terms": {"id": entry_ids}},
+                    ],
+                },
+            },
+        }
+        self.es_client.delete_by_query(index=self.index_name, body=query)
+        return True
