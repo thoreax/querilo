@@ -134,17 +134,27 @@ class ChunkingCachingStrategy(CachingStrategy):
 
     def find(self, doc_id: str, query: str, metadata=None):
         text_entries = super().find(doc_id, query, metadata)
-        # convert to pandas and group by chunk_id
-        df = pd.DataFrame([text_entry.to_dict() for text_entry in text_entries])
-        df["chunk_id"] = df["metadata"].apply(lambda x: x["chunk_id"])
-        df = df.drop(columns=["metadata"])
-        df = df.groupby("chunk_id").agg(lambda x: " ".join(x))
-        # convert back to list of TextEntry
-        text_entries = [
-            TextEntry(id=chunk_id, text=text, metadata={"chunk_id": chunk_id})
-            for chunk_id, text in df["text"].items()
-        ]
-        return text_entries
+        unique_chunk_ids = set([text_entry.metadata["chunk_id"] for text_entry in text_entries])
+        by_chunk = {}
+        for chunk_id in unique_chunk_ids:
+            by_chunk[chunk_id] = {"rank_score": 0, "entries": []}
+        for i, text_entry in enumerate(text_entries):
+            by_chunk[text_entry.metadata["chunk_id"]]["rank_score"] += len(text_entry.text)
+            by_chunk[text_entry.metadata["chunk_id"]]["entries"].append(text_entry)
+        sorted_chunks = sorted(by_chunk.items(), key=lambda x: -x[1]["rank_score"])
+        final_entries = []
+        for (chunk_id, chunk_data) in list(sorted_chunks):
+            entries = chunk_data["entries"]
+            text = " ... ".join([e.text for e in entries])
+            metadata = entries[0].metadata.copy()
+            metadata["rank_score"] = chunk_data["rank_score"]
+            metadata["chunk_size"] = len(chunk_data["entries"])
+            final_entries.append(TextEntry(
+                id=chunk_id,
+                text=text,
+                metadata=metadata,
+            ))
+        return final_entries
 
 
 class JSONChunkingCachingStrategy(ChunkingCachingStrategy):

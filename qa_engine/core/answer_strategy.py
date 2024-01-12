@@ -10,6 +10,9 @@ import openai
 
 class AnswerStrategy(ABC):
 
+    def __init__(self, top_k=3):
+        self.top_k = top_k
+
     @abstractmethod
     def formulate_answer(self, query: str, entries: [TextEntry], *args, **kwargs) -> str:
         pass
@@ -17,7 +20,8 @@ class AnswerStrategy(ABC):
 
 class OpenAIAnswerStrategy(AnswerStrategy):
 
-    def __init__(self, model_name, openai_key, organization):
+    def __init__(self, model_name, openai_key, organization, top_k=1):
+        super().__init__(top_k)
         self.model_name = model_name
         openai.api_key = openai_key
         openai.organization = organization
@@ -27,7 +31,7 @@ class OpenAIAnswerStrategy(AnswerStrategy):
             engine=self.model_name,
             prompt=text,
             temperature=0.5,
-            max_tokens=10000,
+            max_tokens=4192,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0
@@ -40,24 +44,24 @@ class OpenAIAnswerStrategy(AnswerStrategy):
         response = openai.ChatCompletion.create(
             model=self.model_name,
             temperature=0.5,
-            max_tokens=512,
+            max_tokens=8192,
             top_p=1,
             frequency_penalty=0,
             presence_penalty=0,
             messages=[
-                {"role": "system", "content": ""},
-                {"role": "user", "content": text},
+                {"role": "system", "content": text},
             ]
         )
         openai_response = response['choices'][0]['message']['content'].strip()
         return openai_response
 
     def formulate_answer(self, query: str, entries: [TextEntry], *args, **kwargs) -> str:
+        es = entries[:self.top_k]
         lines = [
-            "Result from Google Search:",
-            "\n".join(entry.text for entry in entries),
+            "Result/Evidence from Google Search:",
+            "\n".join(entry.text for entry in es),
             f"Question: {query}",
-            "Answer: "
+            "Answer (translated in same lang) only use evidence to provide the answer (1 liner sentence): "
         ]
         # print(f"Lines: {lines}")
         if self.model_name.startswith("text"):

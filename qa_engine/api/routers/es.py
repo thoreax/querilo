@@ -42,7 +42,7 @@ def configure_ir_system(index_name: str, config: Settings, text_keys=["descripti
         text_keys=text_keys,
         id_key=id_key,
     )
-    answer_strategy = OpenAIAnswerStrategy("gpt-3.5-turbo-16k", config.openai_key, config.openai_org)
+    answer_strategy = OpenAIAnswerStrategy("gpt-3.5-turbo-16k", config.openai_key, config.openai_org, top_k=1)
     ir_system = IRSystem(caching_strategy=json_strategy, answer_strategy=answer_strategy)
     return ir_system
 
