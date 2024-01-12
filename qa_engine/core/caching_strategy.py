@@ -170,6 +170,19 @@ class JSONChunkingCachingStrategy(ChunkingCachingStrategy):
         self.text_keys = text_keys
         self.id_key = id_key
 
+    def cache(self, document: Document):
+        json_objs = document.data
+        ids = [json_obj[self.id_key] for json_obj in json_objs]
+        existing_text_entries = self.document_factory.retrieve(document.id, ids)
+        id_black_list = [text_entry.id for text_entry in existing_text_entries]
+        to_index_objs = []
+        for json_obj in json_objs:
+            if json_obj[self.id_key] not in id_black_list:
+                to_index_objs.append(json_obj)
+        # Copy the document and replace the data with the filtered json objects
+        new_doc = Document(document.id, data=to_index_objs)
+        super().cache(new_doc)
+
     def _parsed_obj_to_entries(self, parsed_obj: List[dict]) -> List[TextEntry]:
         text_entries = []
         # For every object in the parsed object
@@ -180,6 +193,9 @@ class JSONChunkingCachingStrategy(ChunkingCachingStrategy):
                 # Chunk the text and append the text entries
                 obj_key_text = obj[key]
                 obj_key_text_entries = self._chunk_corpus(obj_key_text)
+                for text_entry in obj_key_text_entries:
+                    text_entry.metadata["obj_id"] = obj_id
+                    text_entry.metadata["obj_key"] = key
                 text_entries += obj_key_text_entries
         return text_entries
 

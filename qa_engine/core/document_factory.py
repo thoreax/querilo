@@ -21,8 +21,7 @@ class DocumentFactory(ABC):
         pass
 
     @abstractmethod
-    def retrieve(self, doc_id, document_ids: List[str], metadata: dict = None, *args, **kwargs) -> [
-        TextEntry]:
+    def retrieve(self, doc_id, document_ids: List[str], metadata: dict = None, *args, **kwargs) -> List[TextEntry]:
         pass
 
     def remove(self, doc_id, entries: List[TextEntry], *args, **kwargs) -> bool:
