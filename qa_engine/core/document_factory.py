@@ -21,7 +21,7 @@ class DocumentFactory(ABC):
         pass
 
     @abstractmethod
-    def retrieve(self, doc_id, document_ids: List[str], metadata: dict = None, *args, **kwargs) -> List[TextEntry]:
+    def retrieve(self, doc_id, document_ids: List[str]=None, metadata: dict = None, *args, **kwargs) -> List[TextEntry]:
         pass
 
     def remove(self, doc_id, entries: List[TextEntry], *args, **kwargs) -> bool:
@@ -88,7 +88,10 @@ class ESDocumentFactory(DocumentFactory):
         if metadata is not None:
             # match all the keys of metadata query
             for key, value in metadata.items():
-                query["query"]["bool"]["must"].append({"term": {f"metadata.{key}": value}})
+                if isinstance(value, str):
+                    query["query"]["bool"]["must"].append({"term": {f"metadata.{key}": value}})
+                elif isinstance(value, list):
+                    query["query"]["bool"]["must"].append({"terms": {f"metadata.{key}.keyword": value}})
         response = self.es_client.search(index=self.index_name, body=query)
         entries = [
             TextEntry(

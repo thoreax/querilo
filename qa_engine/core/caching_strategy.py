@@ -172,7 +172,7 @@ class JSONChunkingCachingStrategy(ChunkingCachingStrategy):
     def cache(self, document: Document):
         json_objs: List[dict] = document.data
         ids = [json_obj[self.id_key] for json_obj in json_objs]
-        existing_text_entries = self.document_factory.retrieve(document.id, ids)
+        existing_text_entries = self.document_factory.retrieve(document.id, document_ids=None, metadata={"obj_id": ids})
         id_black_list = [text_entry.id for text_entry in existing_text_entries]
         white_objects = list(filter(lambda x: x[self.id_key] not in id_black_list, json_objs))
         new_doc = Document(document.id, data=white_objects)
@@ -189,6 +189,7 @@ class JSONChunkingCachingStrategy(ChunkingCachingStrategy):
                 obj_key_text = obj[key]
                 obj_key_text_entries = self._chunk_corpus(obj_key_text)
                 for text_entry in obj_key_text_entries:
+                    text_entry.metadata["obj_id"] = obj_id
                     text_entry.metadata["key"] = key
                     text_entry.metadata["obj"] = obj
                 text_entries += obj_key_text_entries
