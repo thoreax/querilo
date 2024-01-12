@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends
 from qa_engine.api.config import get_settings, Settings
 from qa_engine.core.document_factory import ESDocumentFactory
 from qa_engine.core.embedding_factory import ESEmbeddingFactory
-from qa_engine.core.caching_strategy import JSONCachingStrategy
+from qa_engine.core.caching_strategy import JSONChunkingCachingStrategy
 from qa_engine.core.embedding_operator import OpenAIEmbeddingOperator
 from qa_engine.core.document_operator import BasicDocumentOperator
 from qa_engine.core.answer_strategy import OpenAIAnswerStrategy
@@ -34,7 +34,7 @@ def configure_ir_system(index_name: str, config: Settings, text_keys=["descripti
         "cloud_id": config.es_cloud_id,
         "http_auth": (config.es_username, config.es_password),
     }
-    json_strategy = JSONCachingStrategy(
+    json_strategy = JSONChunkingCachingStrategy(
         document_factory=ESDocumentFactory(es_client_params, index_name+"$docs"),
         embedding_factory=ESEmbeddingFactory(es_client_params, index_name+"$embs", embedding_size=1536),
         embedding_operator=OpenAIEmbeddingOperator("text-embedding-ada-002", config.openai_key, config.openai_org),

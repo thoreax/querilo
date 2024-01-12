@@ -8,19 +8,18 @@ from typing import List
 import pandas as pd
 from qa_engine.utils.chunk import chunk_corpus
 
-"""
-CachingStrategy is an abstract class that defines the interface for caching strategies.
-
-Responsibilities: 
-    - Manipulates the document and converts into a list of TextEntry and EmbeddingEntry objects.
-    - Utilises the factories to store the entries.
-    - Utilises the operators to parse the documents and embed the text.
-    - finding relevant documents given a query in accordance with the way the entries returning the list of ids.
-    
-"""
-
 
 class CachingStrategy(ABC):
+    """
+    CachingStrategy is an abstract class that defines the interface for caching strategies.
+
+    Responsibilities:
+        - Manipulates the document and converts into a list of TextEntry and EmbeddingEntry objects.
+        - Utilises the factories to store the entries.
+        - Utilises the operators to parse the documents and embed the text.
+        - finding relevant documents given a query in accordance with the way the entries returning the list of ids.
+
+    """
 
     def __init__(self,
                  embedding_factory: EmbeddingFactory,
@@ -76,7 +75,7 @@ class CachingStrategy(ABC):
         self.document_factory.store(doc_id, entries, *args, **kwargs)
 
 
-class JSONCachingStrategy(CachingStrategy):
+class BasicJSONCachingStrategy(CachingStrategy):
 
     def __init__(self,
                  embedding_factory: EmbeddingFactory,
@@ -142,9 +141,46 @@ class ChunkingCachingStrategy(CachingStrategy):
         df = df.drop(columns=["metadata"])
         df = df.groupby("chunk_id").agg(lambda x: " ".join(x))
         # convert back to list of TextEntry
-        text_entries = [TextEntry(id=chunk_id, text=text, metadata={"chunk_id": chunk_id}) for
-                        chunk_id, text in
-                        df["text"].items()]
+        text_entries = [
+            TextEntry(id=chunk_id, text=text, metadata={"chunk_id": chunk_id})
+            for chunk_id, text in df["text"].items()
+        ]
+        return text_entries
+
+
+class JSONChunkingCachingStrategy(ChunkingCachingStrategy):
+
+    def __init__(self,
+                 embedding_factory: EmbeddingFactory,
+                 document_factory: DocumentFactory,
+                 embedding_operator: EmbeddingOperator,
+                 document_operator: DocumentOperator,
+                 text_keys: List[str],
+                 id_key: str,
+                 chunk_size=8,
+                 sentence_word_count=(15, 100)):
+        super().__init__(
+            embedding_factory,
+            document_factory,
+            embedding_operator,
+            document_operator,
+            chunk_size,
+            sentence_word_count,
+        )
+        self.text_keys = text_keys
+        self.id_key = id_key
+
+    def _parsed_obj_to_entries(self, parsed_obj: List[dict]) -> List[TextEntry]:
+        text_entries = []
+        # For every object in the parsed object
+        for obj in parsed_obj:
+            obj_id = obj[self.id_key]
+            # For every text key in the object
+            for key in self.text_keys:
+                # Chunk the text and append the text entries
+                obj_key_text = obj[key]
+                obj_key_text_entries = self._chunk_corpus(obj_key_text)
+                text_entries += obj_key_text_entries
         return text_entries
 
 
