@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import List
 
 import elasticsearch.helpers
 
@@ -10,12 +11,15 @@ from elasticsearch.helpers import bulk
 class EmbeddingFactory(ABC):
 
     @abstractmethod
-    def store(self, doc_id: str, embeddings: [EmbeddingEntry], *args, **kwargs):
+    def store(self, doc_id: str, embeddings: List[EmbeddingEntry], *args, **kwargs):
         pass
 
     @abstractmethod
-    def retrieve(self, doc_id: str, embedding: [float], metadata: dict, *args, **kwargs) -> [
-        EmbeddingEntry]:
+    def remove(self, doc_id: str, embeddings: List[EmbeddingEntry], *args, **kwargs):
+        pass
+
+    @abstractmethod
+    def retrieve(self, doc_id: str, embedding: List[float], metadata: dict, *args, **kwargs) -> List[EmbeddingEntry]:
         pass
 
 
@@ -61,7 +65,7 @@ class ESEmbeddingFactory(EmbeddingFactory):
             },
         })
 
-    def store(self, doc_id: str, embeddings: [EmbeddingEntry], refresh=False, *args, **kwargs):
+    def store(self, doc_id: str, embeddings: List[EmbeddingEntry], refresh=False, *args, **kwargs):
         actions = [
             {
                 "_index": self.index_name,
@@ -81,7 +85,7 @@ class ESEmbeddingFactory(EmbeddingFactory):
                 # print reason
                 print(item['index']['error'])
 
-    def retrieve(self, doc_id, embedding: [float], metadata: dict = None, *args, **kwargs) -> [
+    def retrieve(self, doc_id, embedding: List[float], metadata: dict = None, *args, **kwargs) -> [
         EmbeddingEntry]:
         # fast retrieval and sort by score
         query = {
@@ -114,3 +118,21 @@ class ESEmbeddingFactory(EmbeddingFactory):
             )
             for hit in response["hits"]["hits"]
         ]
+
+    def remove(self, doc_id: str, embeddings: List[EmbeddingEntry], refresh=False, *args, **kwargs):
+        actions = [
+            {
+                "_op_type": "delete",
+                "_index": self.index_name,
+                "_id": embedding_entry.id,
+            }
+            for embedding_entry in embeddings]
+        try:
+            bulk(self.es_client, actions, refresh=refresh)
+        except elasticsearch.helpers.BulkIndexError as e:
+            # Print reaosons
+            for item in e.errors:
+                # print reason
+                print(item['index']['error'])
+
+                

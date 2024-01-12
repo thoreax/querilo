@@ -3,6 +3,7 @@ from qa_engine.core.models import TextEntry
 from elasticsearch import Elasticsearch
 from elasticsearch.helpers import bulk
 import uuid
+from typing import List
 
 
 def generate_id() -> str:
@@ -12,11 +13,15 @@ def generate_id() -> str:
 class DocumentFactory(ABC):
 
     @abstractmethod
-    def store(self, doc_id, entries: [TextEntry], *args, **kwargs) -> bool:
+    def store(self, doc_id, entries: List[TextEntry], *args, **kwargs) -> bool:
         pass
 
     @abstractmethod
-    def retrieve(self, doc_id, document_ids: [str], metadata: dict = None, *args, **kwargs) -> [
+    def remove(self, doc_id, entries: List[TextEntry], *args, **kwargs) -> bool:
+        pass
+
+    @abstractmethod
+    def retrieve(self, doc_id, document_ids: List[str], metadata: dict = None, *args, **kwargs) -> [
         TextEntry]:
         pass
 
@@ -48,7 +53,7 @@ class ESDocumentFactory(DocumentFactory):
             },
         })
 
-    def store(self, doc_id, entries: [TextEntry], refresh=False, *args, **kwargs) -> bool:
+    def store(self, doc_id, entries: List[TextEntry], refresh=False, *args, **kwargs) -> bool:
         actions = [
             {
                 "_index": self.index_name,
@@ -65,7 +70,19 @@ class ESDocumentFactory(DocumentFactory):
         bulk(self.es_client, actions, refresh=refresh)
         return True
 
-    def retrieve(self, doc_id, document_ids: [str] = None, metadata: dict = None, *args,
+    def remove(self, doc_id, entries: List[TextEntry], refresh=False, *args, **kwargs) -> bool:
+        actions = [
+            {
+                "_op_type": "delete",
+                "_index": self.index_name,
+                "_id": f"{doc_id}_{entry.id}",
+            }
+            for entry in entries
+        ]
+        bulk(self.es_client, actions, refresh=refresh)
+        return True
+
+    def retrieve(self, doc_id, document_ids: List[str] = None, metadata: dict = None, *args,
                  **kwargs) -> [TextEntry]:
         query = {
             "query": {
